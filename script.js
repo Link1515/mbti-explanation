@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     autocompleteList.className = 'autocomplete-list';
     autocompleteContainer.appendChild(autocompleteList);
 
+    // 鍵盤導航相關變量
+    let selectedIndex = -1;
+    let currentMatches = [];
+
     function validateMBTI(input) {
         return allMBTITypes.includes(input.toUpperCase());
     }
@@ -98,18 +102,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function showAutocomplete(input) {
         const value = input.toUpperCase();
         autocompleteList.innerHTML = '';
+        selectedIndex = -1;
         
         if (value.length === 0) {
             hideAutocomplete();
             return;
         }
         
-        const matches = allMBTITypes.filter(type => 
+        currentMatches = allMBTITypes.filter(type => 
             type.startsWith(value)
         );
         
-        if (matches.length > 0) {
-            matches.forEach(type => {
+        if (currentMatches.length > 0) {
+            currentMatches.forEach((type, index) => {
                 const li = document.createElement('li');
                 li.textContent = type;
                 li.addEventListener('click', () => {
@@ -126,6 +131,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // 更新選中項目的樣式
+    function updateSelectedItem() {
+        const items = autocompleteList.querySelectorAll('li');
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.style.backgroundColor = '#f0f7ff';
+            } else {
+                item.style.backgroundColor = '';
+            }
+        });
+    }
+
+    // 處理鍵盤導航
+    function handleKeyNavigation(e) {
+        if (autocompleteContainer.style.display === 'none') return;
+
+        const items = autocompleteList.querySelectorAll('li');
+        if (items.length === 0) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % items.length;
+                updateSelectedItem();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                updateSelectedItem();
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < currentMatches.length) {
+                    const selectedType = currentMatches[selectedIndex];
+                    mbtiInput.value = selectedType;
+                    hideAutocomplete();
+                    updateExplanation(selectedType);
+                    updateButtonState();
+                }
+                break;
+            case 'Escape':
+                hideAutocomplete();
+                break;
+        }
+    }
+
     // 隱藏自動完成選項
     function hideAutocomplete() {
         autocompleteContainer.style.display = 'none';
@@ -152,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
             handleSearch();
         }
     });
+    
+    mbtiInput.addEventListener('keydown', handleKeyNavigation);
     
     // 輸入時顯示自動完成選項並更新按鈕狀態
     mbtiInput.addEventListener('input', () => {
