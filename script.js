@@ -62,14 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateExplanation(mbtiType) {
-        const dimensions = document.querySelectorAll('.dimension p');
+        const dimensions = document.querySelectorAll('.dimension');
         const letters = mbtiType.toUpperCase().split('');
         
-        typeTitle.textContent = `${mbtiType.toUpperCase()} 人格類型解釋`;
+        typeTitle.textContent = letters.join(' · ');
         
         letters.forEach((letter, index) => {
             const data = mbtiData[letter];
-            dimensions[index].textContent = data.description;
+            const heading = dimensions[index].querySelector('h3');
+            const description = dimensions[index].querySelector('p');
+            
+            // Extract the English word from the title (it's in parentheses)
+            const englishWord = data.title.match(/\((.*?)\)/)[1];
+            const titleWithoutWord = data.title.replace(/\((.*?)\)/, '');
+            heading.innerHTML = `${titleWithoutWord} (<span class="highlight-letter">${englishWord.charAt(0)}</span>${englishWord.slice(1)})`;
+            description.textContent = data.description;
         });
 
         resultSection.classList.add('active');

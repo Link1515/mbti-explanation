@@ -163,6 +163,11 @@ button.disabled:hover {
     font-size: 1.1rem;
 }
 
+.highlight-letter {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
 .dimension p {
     color: #666;
     font-size: 0.95rem;
